@@ -56,6 +56,12 @@ options:
       - The AWS region to use. If not specified then the value of the EC2_REGION environment variable, if any, is used.
     required: false
     aliases: ['aws_region', 'ec2_region']
+  instance_profile_name:
+    description:
+      - The name or the Amazon Resource Name (ARN) of the instance profile associated with the IAM role for the instances.
+    required: false
+    default: null
+    aliases: []
   volumes:
     description:
       - a list of volume dicts, each containing device name and optionally ephemeral id or snapshot id. Size and type (and number of iops for io device type) must be specified for a new volume or a root volume, and may be passed for a snapshot volume. For any volume, a volume size less than 1 will be interpreted as a request not to create the volume.
@@ -137,6 +143,7 @@ def create_launch_config(connection, module):
     user_data = module.params.get('user_data')
     volumes = module.params['volumes']
     instance_type = module.params.get('instance_type')
+    instance_profile_name = module.params.get('instance_profile_name')
     spot_price = module.params.get('spot_price')
     instance_monitoring = module.params.get('instance_monitoring')
     bdm = BlockDeviceMapping()
@@ -158,6 +165,7 @@ def create_launch_config(connection, module):
         user_data=user_data,
         block_device_mappings=[bdm],
         instance_type=instance_type,
+        instance_profile_name=instance_profile_name,
         spot_price=spot_price,
         instance_monitoring=instance_monitoring)
 
@@ -198,6 +206,7 @@ def main():
             user_data=dict(type='str'),
             volumes=dict(type='list'),
             instance_type=dict(type='str'),
+            instance_profile_name=dict(type='str'),
             state=dict(default='present', choices=['present', 'absent']),
             spot_price=dict(type='float'),
             instance_monitoring=dict(default=False, type='bool'),
